@@ -4,395 +4,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-VOTING FORDA PASURUAN | PROFESSIONAL SYSTEM</title>
+    <title>PILKETUM 2026 | FORDA PASURUAN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
+         :root {
+            --p-red: #7f1d1d;
+            --s-red: #ef4444;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
         .hidden-section {
             display: none !important;
         }
         
-        .bg-royal-red {
-            background: linear-gradient(135deg, #450a0a 0%, #991b1b 100%);
+        .bg-animate {
+            background: linear-gradient(45deg, #450a0a, #020617, #7f1d1d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
         
-        .card-shadow {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        
-        @keyframes fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
             }
         }
         
-        .animate-fade {
-            animation: fade-in 0.5s ease-out forwards;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .candidate-img {
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: grayscale(40%);
+        }
+        
+        .candidate-card:hover .candidate-img {
+            filter: grayscale(0%);
+            transform: scale(1.1);
+        }
+        
+        .progress-red {
+            background: linear-gradient(90deg, #7f1d1d, #ef4444);
         }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-900 font-sans">
+<body class="bg-animate min-h-screen">
 
-    <div class="fixed top-0 left-0 w-full z-[100] bg-white border-b px-6 py-2 flex justify-between items-center shadow-sm">
-        <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Server Active</span>
-            <span class="text-slate-300">|</span>
-            <span id="liveClock">00:00:00</span>
-        </div>
-        <div class="bg-red-600 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase">
-            <span id="voterCountTop">0</span> Suara Masuk
-        </div>
-    </div>
-
-    <div id="loginOverlay" class="fixed inset-0 z-[150] bg-royal-red flex items-center justify-center p-4">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-md w-full text-center relative overflow-hidden animate-fade">
-            <div class="absolute top-0 left-0 w-full h-2 bg-red-600"></div>
-            <h1 class="text-3xl font-black text-slate-900 mb-2 italic">FORDA.<span class="text-red-600 uppercase">Pas</span></h1>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-8">Leadership Election 2025</p>
-
-            <div class="space-y-4 text-left">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Identitas Pemilih</label>
-                    <input type="text" id="vName" placeholder="Nama Lengkap Anda" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-red-600 rounded-2xl outline-none font-bold transition-all">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">NIM</label>
-                    <input type="text" id="vInfo" placeholder="NIM" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-red-600 rounded-2xl outline-none font-bold transition-all">
-                </div>
-                <button onclick="handleEntry()" class="w-full bg-red-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-red-700 transition-all uppercase tracking-widest text-xs">Masuk Bilik Suara</button>
+    <nav class="fixed top-0 w-full z-[100] px-8 py-6 flex justify-between items-center bg-black/20 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+                <i class="fas fa-vote-yea text-white text-xl"></i>
             </div>
-            <p id="timerWarning" class="mt-6 text-[10px] font-bold text-red-500 uppercase tracking-tighter"></p>
+            <div>
+                <h1 class="text-xl font-bold tracking-tighter uppercase leading-none">PILKETUM.<span class="text-red-500">2026</span></h1>
+                <p class="text-[8px] font-medium tracking-[0.4em] text-slate-400 uppercase italic">Forda Pasuruan Leadership</p>
+            </div>
         </div>
-    </div>
+        <div class="flex items-center gap-6">
+            <div id="liveStatus" class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-bold tracking-widest uppercase" id="voteCounterDisplay">0 Votes</span>
+            </div>
+            <div id="globalTimer" class="hidden-section bg-red-600 px-6 py-2 rounded-lg text-xs font-black italic">00:00:00</div>
+        </div>
+    </nav>
 
-    <div id="mainContent" class="hidden-section pt-16">
-        <header class="bg-white/80 backdrop-blur-md p-6 text-center border-b sticky top-10 z-[50]">
-            <h2 class="text-xl font-black text-slate-900 italic uppercase">Tentukan Masa Depan Organisasi</h2>
-            <div id="userBadge" class="mt-2 text-[9px] font-bold text-red-600 uppercase tracking-widest"></div>
-        </header>
+    <section id="loginOverlay" class="fixed inset-0 z-[200] flex items-center justify-center p-6">
+        <div class="glass-card p-12 rounded-[3rem] max-w-lg w-full text-center relative overflow-hidden">
+            <h2 class="text-4xl font-bold mb-2 tracking-tighter italic uppercase">LOGIN</h2>
+            <p class="text-[9px] font-medium text-slate-500 tracking-[0.6em] mb-10 uppercase italic">PILKETUM FORDA PASURUAN 2026</p>
 
-        <main class="py-12 container mx-auto px-4 max-w-6xl">
-            <div id="candidateGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20"></div>
+            <div id="inputForm" class="space-y-4">
+                <input type="text" id="vName" placeholder="NAMA LENGKAP" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-red-500 transition-all font-bold text-center uppercase tracking-widest text-sm">
+                <input type="text" id="vInfo" placeholder="NIM" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-red-500 transition-all font-bold text-center uppercase tracking-widest text-sm">
+                <button onclick="enterSystem()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-5 rounded-2xl transition-all uppercase tracking-widest text-xs shadow-xl shadow-red-900/40">VERIFIKASI & MASUK</button>
+            </div>
+            <div id="systemLocked" class="hidden-section py-10">
+                <p class="text-red-500 text-2xl font-bold animate-pulse uppercase italic tracking-tighter text-center">Voting Telah Ditutup</p>
+            </div>
+        </div>
+    </section>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div id="chartSection" class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 hidden-section">
-                    <h3 class="font-black text-slate-900 mb-8 uppercase italic flex items-center gap-2">
-                        <i class="fas fa-chart-bar text-red-600"></i> Statistik Perolehan Sementara
-                    </h3>
-                    <div style="height: 350px;"><canvas id="voteChart"></canvas></div>
-                </div>
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 flex flex-col">
-                    <h3 class="font-black text-slate-900 mb-6 uppercase italic text-sm">
-                        <i class="fas fa-history text-red-600 mr-2"></i> Aktivitas Terakhir
-                    </h3>
-                    <div id="recentActivity" class="space-y-4 flex-grow"></div>
-                    <div class="mt-6 p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Sistem Audit</p>
-                        <p class="text-[10px] font-black text-slate-700 mt-1">Data terenkripsi dan diverifikasi oleh IP Address unik pemilih.</p>
-                    </div>
+    <section id="mainApp" class="hidden-section pt-32 pb-24 container mx-auto px-6">
+        <div class="text-center mb-24">
+            <h3 class="text-6xl font-bold tracking-tighter uppercase italic leading-none mb-4">SUARA ANDA <span class="text-red-600">MASA DEPAN.</span></h3>
+            <p id="voterInfoDisplay" class="text-xs font-bold text-slate-500 uppercase tracking-widest italic"></p>
+        </div>
+
+        <div id="candidateContainer" class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32"></div>
+
+        <div id="analyticsSection" class="hidden-section grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="lg:col-span-2 glass-card p-12 rounded-[4rem]">
+                <h4 class="text-xl font-bold mb-10 uppercase italic tracking-widest border-l-4 border-red-600 pl-6 text-left">Live Statistics</h4>
+                <div style="height: 400px;"><canvas id="mainChart"></canvas></div>
+            </div>
+            <div class="glass-card p-12 rounded-[4rem] flex flex-col">
+                <h4 class="text-xl font-bold mb-10 uppercase italic tracking-widest text-center">Recap</h4>
+                <div id="statCards" class="space-y-6 flex-grow"></div>
+                <div class="mt-10 p-6 bg-red-600/10 rounded-3xl border border-red-600/20 text-center">
+                    <p id="aiLabel" class="text-sm font-black italic uppercase tracking-tighter">Monitoring Data...</p>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
+    </section>
 
-    <div id="adminPanel" class="fixed inset-0 z-[200] bg-slate-50 hidden-section p-6 overflow-y-auto">
-        <div class="max-w-6xl mx-auto">
-            <div class="flex justify-between items-center mb-10 border-b pb-6">
+    <section id="successScreen" class="fixed inset-0 z-[300] bg-slate-950 hidden-section flex flex-col items-center justify-center p-10 text-center">
+        <div class="glass-card p-16 rounded-[5rem] max-w-md w-full border-red-600/30">
+            <div class="w-24 h-24 bg-red-600 rounded-full mx-auto mb-8 flex items-center justify-center text-4xl shadow-[0_0_50px_rgba(239,68,68,0.4)]">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="text-3xl font-bold italic mb-2 uppercase">TERIMA KASIH</h2>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-12">Suara Anda Berhasil Direkam Dalam Sistem</p>
+            <div class="text-left bg-black/40 p-6 rounded-3xl border border-white/5 mb-10">
+                <p class="text-[8px] font-bold text-slate-500 uppercase">Verification Token (Resi)</p>
+                <p id="tokenDisplay" class="text-sm font-mono font-bold text-red-500 uppercase tracking-widest"></p>
+            </div>
+            <button onclick="location.reload()" class="text-[10px] font-black uppercase text-slate-400 hover:text-white transition tracking-[0.4em]">KEMBALI</button>
+        </div>
+    </section>
+
+    <section id="adminPanel" class="fixed inset-0 z-[500] bg-slate-950 hidden-section p-8 overflow-y-auto">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8 mb-16 border-b border-white/10 pb-10">
                 <div>
-                    <h2 class="text-2xl font-black text-red-900 italic uppercase">Admin Command Center</h2>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manajemen Suara & Konten</p>
+                    <h2 class="text-4xl font-bold uppercase italic tracking-tighter">CONTROL ROOM 2026</h2>
+                    <p class="text-xs text-red-500 font-bold tracking-[0.4em] uppercase">Status: Administrator Access</p>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="downloadCSV()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-emerald-100">Export CSV</button>
-                    <button onclick="toggleAdmin()" class="bg-white text-slate-900 w-10 h-10 rounded-full flex items-center justify-center shadow-lg border hover:bg-red-600 hover:text-white transition"><i class="fas fa-times"></i></button>
+                <div class="flex gap-4">
+                    <button onclick="downloadExcel()" class="bg-emerald-600 text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest"><i class="fas fa-file-excel mr-2 text-sm"></i> Download Excel Pro</button>
+                    <button onclick="toggleAdmin()" class="bg-white/10 w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-600 transition"><i class="fas fa-times text-sm"></i></button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
-                    <h4 class="font-black text-[10px] uppercase text-red-600 mb-4 tracking-widest">Set Durasi Voting (Menit)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+                <div class="glass-card p-8 rounded-[3rem] text-center border-red-600/20">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Total Participation</p>
+                    <p id="admTotalCount" class="text-5xl font-bold text-white tracking-tighter">0</p>
+                </div>
+                <div class="glass-card p-8 rounded-[3rem] text-center">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-4 italic">Timer Management (Mins)</p>
                     <div class="flex gap-2">
-                        <input type="number" id="adminTimerInput" placeholder="Contoh: 60" class="flex-grow p-3 bg-slate-50 rounded-xl outline-none font-bold">
-                        <button onclick="setTimer()" class="bg-red-600 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase">Aktifkan</button>
+                        <input type="number" id="timerMin" class="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-xs font-bold outline-none text-center">
+                        <button onclick="startGlobalTimer()" class="bg-red-600 text-white px-4 rounded-xl text-[10px] font-black">SET</button>
                     </div>
                 </div>
-                <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <h4 class="font-black text-[10px] uppercase text-slate-900 tracking-widest">Visibilitas Live Count</h4>
-                        <p class="text-[9px] text-slate-400 font-bold italic mt-1">Sembunyikan angka selama pemilihan berlangsung</p>
-                    </div>
-                    <button id="chartToggler" onclick="toggleChart()" class="w-14 h-7 bg-slate-200 rounded-full p-1 transition-all"><div id="dotToggler" class="w-5 h-5 bg-white rounded-full transition-all"></div></button>
+                <div class="glass-card p-8 rounded-[3rem] flex items-center justify-between">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase">Visibility</p>
+                    <button onclick="toggleChartCfg()" id="chartCfgBtn" class="bg-white/5 border border-white/10 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Hidden</button>
+                </div>
+                <div class="glass-card p-8 rounded-[3rem] text-center">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-2 italic">Integrity Status</p>
+                    <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest">SECURE ✓</p>
                 </div>
             </div>
 
-            <div id="adminCandidateEdit" class="space-y-4 mb-10"></div>
+            <div id="admCandidateEditor" class="space-y-4 mb-16"></div>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                <h4 class="font-black text-[10px] uppercase text-slate-400 mb-6 tracking-widest border-b pb-2">Audit Traceability (Log Seluruh Pemilih)</h4>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[11px] font-bold">
+            <div class="glass-card p-12 rounded-[4rem] overflow-hidden">
+                <h4 class="text-xs font-bold uppercase mb-10 tracking-[0.4em] italic opacity-50">Audit Traceability Logs</h4>
+                <div class="overflow-x-auto text-left">
+                    <table class="w-full text-xs">
                         <thead>
-                            <tr class="text-slate-400 border-b">
-                                <th class="p-3">WAKTU</th>
-                                <th class="p-3">NAMA PEMILIH</th>
-                                <th class="p-3">PILIHAN</th>
-                                <th class="p-3">IP DEVICE</th>
-                                <th class="p-3 text-center">AKSI</th>
+                            <tr class="text-slate-500 uppercase font-black tracking-widest border-b border-white/5">
+                                <th class="p-6">Time</th>
+                                <th class="p-6">Identity</th>
+                                <th class="p-6">Choice</th>
+                                <th class="p-6 text-center">Audit</th>
                             </tr>
                         </thead>
-                        <tbody id="auditTable"></tbody>
+                        <tbody id="logTableBody" class="uppercase"></tbody>
                     </table>
                 </div>
             </div>
 
-            <button onclick="factoryReset()" class="mt-10 w-full p-4 border-2 border-red-50 text-red-100 hover:text-red-600 transition rounded-[2rem] font-black uppercase text-[10px] tracking-[0.3em]">Factory Reset System</button>
+            <button onclick="hardReset()" class="mt-24 w-full text-[9px] font-black uppercase text-red-900 hover:text-red-500 transition tracking-[1em] italic">Decommission All System Data</button>
         </div>
-    </div>
+    </section>
 
-    <div class="fixed bottom-6 right-6 z-[250]">
-        <button onclick="toggleAdmin()" class="w-12 h-12 bg-slate-900 text-white rounded-2xl shadow-xl flex items-center justify-center hover:scale-110 transition-all border border-white/20">
-            <i class="fas fa-cog"></i>
+    <div class="fixed bottom-8 right-8 z-[250]">
+        <button onclick="toggleAdmin()" class="w-16 h-16 bg-red-600/20 hover:bg-red-600 text-white rounded-2xl shadow-2xl flex items-center justify-center backdrop-blur-md border border-white/10 transition-all hover:rotate-90">
+            <i class="fas fa-hammer text-xl"></i>
         </button>
     </div>
 
     <script>
         let ip = "0.0.0.0";
-        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => {
-            ip = d.ip;
-        }).catch(e => console.log("IP fetch failed"));
+        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => ip = d.ip).catch(() => console.log("Offline"));
 
-        // CLOCK
-        setInterval(() => {
-            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('id-ID');
-        }, 1000);
-
-        const defData = [{
+        const defaultKandidat = [{
             id: 0,
-            nama: "Ahmad Zaki",
+            nama: "Zaki Ahmad",
             visi: "Mewujudkan pemuda Pasuruan yang inovatif.",
-            foto: "https://via.placeholder.com/400x500?text=Kandidat+01",
+            foto: "https://via.placeholder.com/500x700?text=KANDIDAT+01",
             suara: 0
         }, {
             id: 1,
             nama: "Siti Aminah",
-            visi: "Sinergi kolaborasi pemuda Pasuruan.",
-            foto: "https://via.placeholder.com/400x500?text=Kandidat+02",
+            visi: "Kolaborasi ekonomi kreatif pemuda.",
+            foto: "https://via.placeholder.com/500x700?text=KANDIDAT+02",
             suara: 0
         }, {
             id: 2,
             nama: "Bambang Heru",
             visi: "Membangun Forda yang transparan.",
-            foto: "https://via.placeholder.com/400x500?text=Kandidat+03",
+            foto: "https://via.placeholder.com/500x700?text=KANDIDAT+03",
             suara: 0
         }];
 
-        let candidates = JSON.parse(localStorage.getItem('frd_v3_data')) || defData;
-        let logs = JSON.parse(localStorage.getItem('frd_v3_logs')) || [];
-        let config = JSON.parse(localStorage.getItem('frd_v3_cfg')) || {
-            showChart: false,
-            expiry: 0
+        let candidates = JSON.parse(localStorage.getItem('frd_2026_data')) || defaultKandidat;
+        let logs = JSON.parse(localStorage.getItem('frd_2026_logs')) || [];
+        let config = JSON.parse(localStorage.getItem('frd_2026_cfg')) || {
+            chart: false,
+            expire: 0
         };
-        let voteChart;
+        let mainChart;
+        let sessionLocked = false;
 
-        function handleEntry() {
-            const name = document.getElementById('vName').value.trim();
-            const info = document.getElementById('vInfo').value.trim();
-            if (!name || !info) return alert("Harap lengkapi identitas Anda!");
-            if (localStorage.getItem('voted_' + name.toLowerCase())) return alert("Nama ini sudah tercatat memberikan suara!");
-            if (logs.find(l => l.ip === ip && ip !== "0.0.0.0")) return alert("Satu perangkat hanya diperbolehkan satu kali suara!");
+        function enterSystem() {
+            if (sessionLocked) return;
+            const n = document.getElementById('vName').value.trim();
+            const i = document.getElementById('vInfo').value.trim();
+            if (!n || !i) return alert("Lengkapi data!");
+            if (localStorage.getItem('v_' + n.toLowerCase())) return alert("Nama ini sudah ngevote!");
+            if (logs.find(l => l.ip === ip && ip !== "0.0.0.0")) return alert("Perangkat sudah digunakan!");
 
             document.getElementById('loginOverlay').classList.add('hidden-section');
-            document.getElementById('mainContent').classList.remove('hidden-section');
-            document.getElementById('userBadge').innerText = `${name.toUpperCase()} | ${info.toUpperCase()} | VERIFIED`;
-            document.getElementById('voterCountTop').innerText = logs.length;
+            document.getElementById('mainApp').classList.remove('hidden-section');
+            document.getElementById('voterInfoDisplay').innerText = `IDENTITAS: ${n.toUpperCase()} // ${i.toUpperCase()}`;
+            document.getElementById('voteCounterDisplay').innerText = `${logs.length} Votes`;
 
-            if (config.showChart) {
-                document.getElementById('chartSection').classList.remove('hidden-section');
-            }
-
+            if (config.chart) document.getElementById('analyticsSection').classList.remove('hidden-section');
             renderCandidates();
-            updateActivity();
             initChart();
+            renderStats();
         }
 
         function renderCandidates() {
-            document.getElementById('candidateGrid').innerHTML = candidates.map((k, i) => `
-                <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-100 flex flex-col group animate-fade">
-                    <div class="h-80 overflow-hidden relative">
-                        <img src="${k.foto}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-red-950 to-transparent opacity-60"></div>
-                        <div class="absolute bottom-6 left-8 text-left">
-                            <h4 class="text-2xl font-black text-white italic uppercase">${k.nama}</h4>
-                            <p class="text-[9px] font-black text-red-400 tracking-widest uppercase mt-1">Nomor Urut 0${i+1}</p>
+            document.getElementById('candidateContainer').innerHTML = candidates.map((k, i) => `
+                <div class="candidate-card glass-card rounded-[4rem] overflow-hidden flex flex-col group transition-all duration-500">
+                    <div class="h-[450px] relative overflow-hidden">
+                        <img src="${k.foto}" id="cImg${i}" class="candidate-img w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-80"></div>
+                        <div class="absolute bottom-10 left-10 text-left">
+                            <h4 class="text-3xl font-bold text-white italic uppercase tracking-tighter">${k.nama}</h4>
+                            <p class="text-[9px] font-bold text-red-500 tracking-[0.4em] uppercase mt-2">No Urut 0${i+1}</p>
                         </div>
                     </div>
-                    <div class="p-8 text-center flex-grow flex flex-col">
-                        <p class="text-slate-500 text-xs font-bold leading-relaxed mb-8 flex-grow">"${k.visi}"</p>
-                        <button onclick="castVote(${i})" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl hover:bg-red-600 transition shadow-xl uppercase tracking-widest text-[10px]">Berikan Suara</button>
+                    <div class="p-12 text-center flex-grow flex flex-col bg-black/20">
+                        <p class="text-slate-400 text-xs font-medium leading-relaxed mb-12 italic opacity-60">"${k.visi}"</p>
+                        <button onclick="submitVote(${i})" class="w-full bg-white/5 hover:bg-red-600 text-white font-black py-5 rounded-[2rem] border border-white/10 transition-all uppercase tracking-widest text-[10px]">Pilih Kandidat</button>
                     </div>
                 </div>`).join('');
         }
 
-        function castVote(idx) {
+        function submitVote(idx) {
+            if (sessionLocked) return alert("LOCKED");
             const name = document.getElementById('vName').value;
-            if (confirm(`Apakah Anda yakin ingin memberikan mandat kepada ${candidates[idx].nama}?`)) {
+            if (confirm(`Konfirmasi pilihan untuk ${candidates[idx].nama.toUpperCase()}?`)) {
                 candidates[idx].suara++;
+                const token = "PKT-" + Math.random().toString(36).substr(2, 8).toUpperCase();
                 logs.push({
-                    id: Date.now(),
-                    time: new Date().toLocaleTimeString('id-ID'),
-                    name: name,
-                    ip: ip,
-                    pNama: candidates[idx].nama,
-                    pIdx: idx
+                    t: new Date().toLocaleString('id-ID'),
+                    n: name,
+                    p: candidates[idx].nama,
+                    ip,
+                    pIdx: idx,
+                    token
                 });
 
-                localStorage.setItem('frd_v3_data', JSON.stringify(candidates));
-                localStorage.setItem('frd_v3_logs', JSON.stringify(logs));
-                localStorage.setItem('voted_' + name.toLowerCase(), 'true');
+                localStorage.setItem('frd_2026_data', JSON.stringify(candidates));
+                localStorage.setItem('frd_2026_logs', JSON.stringify(logs));
+                localStorage.setItem('v_' + name.toLowerCase(), 'true');
 
                 confetti({
-                    particleCount: 150,
-                    spread: 70,
+                    particleCount: 200,
+                    spread: 90,
                     origin: {
                         y: 0.6
-                    },
-                    colors: ['#991b1b', '#000000']
+                    }
                 });
-                alert("SUARA ANDA SAH!");
-                location.reload();
+
+                document.getElementById('mainApp').classList.add('hidden-section');
+                document.getElementById('successScreen').classList.remove('hidden-section');
+                document.getElementById('tokenDisplay').innerText = token;
             }
         }
 
+        // ADMIN
         function toggleAdmin() {
-            const panel = document.getElementById('adminPanel');
-            if (panel.classList.contains('hidden-section')) {
-                const pass = prompt("PASSWORD ADMIN:");
-                if (pass === "forda123") {
-                    panel.classList.remove('hidden-section');
-                    renderAdminView();
-                    renderLogs();
-                    updateAdminUI();
-                } else if (pass !== null) {
-                    alert("Password Salah!");
+            const p = document.getElementById('adminPanel');
+            if (p.classList.contains('hidden-section')) {
+                if (prompt("PASSCODE ADMIN:") === "forda123") {
+                    p.classList.remove('hidden-section');
+                    refreshAdminUI();
                 }
             } else {
-                panel.classList.add('hidden-section');
+                p.classList.add('hidden-section');
             }
         }
 
-        function renderAdminView() {
-            document.getElementById('adminCandidateEdit').innerHTML = candidates.map((k, i) => `
-                <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-6 text-left">
-                    <img src="${k.foto}" id="pre${i}" class="w-14 h-14 rounded-2xl object-cover shadow-md">
-                    <div class="flex-grow space-y-2">
-                        <input type="text" value="${k.nama}" onchange="upK(${i}, 'nama', this.value)" class="w-full p-2 bg-slate-50 border-none rounded-xl text-xs font-black uppercase">
-                        <input type="text" value="${k.visi}" onchange="upK(${i}, 'visi', this.value)" class="w-full p-2 bg-slate-50 border-none rounded-xl text-xs italic">
-                        <button onclick="document.getElementById('f${i}').click()" class="text-[7px] font-black text-red-600 uppercase">Ganti Foto Kandidat</button>
-                        <input type="file" id="f${i}" class="hidden" onchange="upImg(event, ${i})">
+        function refreshAdminUI() {
+            document.getElementById('admTotalCount').innerText = logs.length;
+            document.getElementById('chartCfgBtn').innerText = config.chart ? "VISIBLE" : "HIDDEN";
+            document.getElementById('admCandidateEditor').innerHTML = candidates.map((k, i) => `
+                <div class="p-8 glass-card rounded-[3rem] flex flex-wrap items-center gap-8">
+                    <div class="text-center">
+                        <img src="${k.foto}" id="admPre${i}" class="w-20 h-20 rounded-3xl object-cover shadow-xl">
+                        <button onclick="document.getElementById('f${i}').click()" class="text-[8px] font-bold text-red-500 uppercase mt-3 block">Ganti Foto</button>
+                        <input type="file" id="f${i}" class="hidden" onchange="uploadImage(event, ${i})">
                     </div>
-                    <div class="bg-red-800 text-white p-4 rounded-3xl min-w-[80px] text-center shadow-lg shadow-red-100">
-                        <p class="text-[10px] font-black">${k.suara}</p>
-                        <p class="text-[7px] uppercase font-bold opacity-60">Votes</p>
+                    <div class="flex-grow space-y-3 text-left">
+                        <input type="text" value="${k.nama}" onchange="updateData(${i},'nama',this.value)" class="w-full bg-white/5 border-none rounded-2xl p-3 text-xs font-bold uppercase outline-none">
+                        <textarea onchange="updateData(${i},'visi',this.value)" class="w-full bg-white/5 border-none rounded-2xl p-3 text-[10px] outline-none h-20">${k.visi}</textarea>
+                    </div>
+                    <div class="bg-red-600 text-white p-6 rounded-[2.5rem] text-center min-w-[120px]">
+                        <p class="text-4xl font-bold tracking-tighter">${k.suara}</p>
+                        <p class="text-[8px] uppercase font-bold opacity-50 tracking-widest leading-none">Votes</p>
                     </div>
                 </div>`).join('');
-        }
 
-        function renderLogs() {
-            document.getElementById('auditTable').innerHTML = logs.map(l => `
-                <tr class="border-b border-slate-50 hover:bg-red-50 transition">
-                    <td class="p-4 text-slate-300 font-mono text-[9px] uppercase">${l.time}</td>
-                    <td class="p-4 font-black text-left">${l.name}</td>
-                    <td class="p-4 text-red-600 italic font-black uppercase text-left">${l.pNama}</td>
-                    <td class="p-4 text-slate-400 font-mono text-[9px] text-left">${l.ip}</td>
-                    <td class="p-4 text-center">
-                        <button onclick="removeV(${l.id})" class="text-red-300 hover:text-red-600 transition"><i class="fas fa-trash"></i></button>
-                    </td>
+            document.getElementById('logTableBody').innerHTML = logs.map((l, i) => `
+                <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                    <td class="p-6 text-slate-500 font-mono text-[10px] italic">${l.t}</td>
+                    <td class="p-6 font-bold text-left">${l.n} <br> <span class="text-[9px] text-red-500 font-mono">${l.token}</span></td>
+                    <td class="p-6 text-red-500 font-bold italic tracking-tighter text-left">${l.p}</td>
+                    <td class="p-6 text-center"><button onclick="deleteRecord(${i})" class="text-red-900 hover:text-red-500 transition"><i class="fas fa-trash"></i></button></td>
                 </tr>`).reverse().join('');
         }
 
-        function updateActivity() {
-            const activityHtml = logs.slice(-5).map(l => `
-                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-left">
-                    <div class="w-2 h-2 bg-red-600 rounded-full"></div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase">${l.name}</p>
-                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">${l.time} - Verified</p>
-                    </div>
-                </div>`).reverse().join('');
-            document.getElementById('recentActivity').innerHTML = activityHtml || '<p class="text-center text-slate-300 text-xs py-10 font-black uppercase text-center">Belum ada suara</p>';
-        }
-
-        function upK(i, k, v) {
-            candidates[i][k] = v;
-            localStorage.setItem('frd_v3_data', JSON.stringify(candidates));
-        }
-
-        function upImg(e, i) {
-            const r = new FileReader();
-            r.onload = (ev) => {
-                candidates[i].foto = ev.target.result;
-                document.getElementById('pre' + i).src = ev.target.result;
-                localStorage.setItem('frd_v3_data', JSON.stringify(candidates));
+        async function downloadExcel() {
+            const wb = new ExcelJS.Workbook();
+            const ws = wb.addWorksheet('REPORT 2026');
+            ws.addRow(['OFFICIAL PILKETUM FORDA 2026 REPORT']).font = {
+                bold: true,
+                size: 16
             };
-            r.readAsDataURL(e.target.files[0]);
-        }
-
-        function removeV(id) {
-            const idx = logs.findIndex(l => l.id === id);
-            if (idx > -1 && confirm("Batalkan suara pemilih ini secara permanen?")) {
-                candidates[logs[idx].pIdx].suara--;
-                localStorage.removeItem('voted_' + logs[idx].name.toLowerCase());
-                logs.splice(idx, 1);
-                localStorage.setItem('frd_v3_data', JSON.stringify(candidates));
-                localStorage.setItem('frd_v3_logs', JSON.stringify(logs));
-                renderLogs();
-                renderAdminView();
-                alert("Data berhasil dihapus!");
+            ws.addRow(['DATA REKAPITULASI']);
+            ws.addRow(['No', 'Kandidat', 'Suara', 'Persen']);
+            const total = logs.length || 1;
+            candidates.forEach((k, i) => {
+                ws.addRow([i + 1, k.nama, k.suara, ((k.suara / total) * 100).toFixed(2) + '%']);
+            });
+            const canvas = document.getElementById('mainChart');
+            if (canvas) {
+                const imgData = canvas.toDataURL('image/png');
+                const imgId = wb.addImage({
+                    base64: imgData,
+                    extension: 'png'
+                });
+                ws.addImage(imgId, {
+                    tl: {
+                        col: 5,
+                        row: 3
+                    },
+                    ext: {
+                        width: 500,
+                        height: 300
+                    }
+                });
             }
-        }
-
-        function toggleChart() {
-            config.showChart = !config.showChart;
-            localStorage.setItem('frd_v3_cfg', JSON.stringify(config));
-            updateAdminUI();
-            alert("Setting grafik diperbarui!");
-        }
-
-        function updateAdminUI() {
-            const btn = document.getElementById('chartToggler');
-            const dot = document.getElementById('dotToggler');
-            btn.classList.toggle('bg-red-600', config.showChart);
-            btn.classList.toggle('bg-slate-200', !config.showChart);
-            dot.style.marginLeft = config.showChart ? '28px' : '0px';
-        }
-
-        function setTimer() {
-            const m = document.getElementById('adminTimerInput').value;
-            if (!m) return alert("Isi angka menit!");
-            config.expiry = new Date().getTime() + (parseInt(m) * 60000);
-            localStorage.setItem('frd_v3_cfg', JSON.stringify(config));
-            alert("Timer Berhasil Diaktifkan!");
+            const buf = await wb.xlsx.writeBuffer();
+            const blob = new Blob([buf], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Laporan_Pilketum_2026.xlsx`;
+            link.click();
         }
 
         function initChart() {
-            const ctx = document.getElementById('voteChart').getContext('2d');
-            if (voteChart) voteChart.destroy();
-            voteChart = new Chart(ctx, {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if (mainChart) mainChart.destroy();
+            mainChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: candidates.map(k => k.nama),
                     datasets: [{
                         data: candidates.map(k => k.suara),
-                        backgroundColor: '#991b1b',
-                        borderRadius: 20,
+                        backgroundColor: '#7f1d1d',
+                        borderRadius: 25,
                         barThickness: 50
                     }]
                 },
@@ -417,33 +428,87 @@
             });
         }
 
-        function downloadCSV() {
-            let csv = "Waktu,Nama,Pilihan,IP\n" + logs.map(l => `${l.time},${l.name},${l.pNama},${l.ip}`).join("\n");
-            let a = document.createElement('a');
-            a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-            a.download = 'Laporan_Audit_Voting.csv';
-            a.click();
+        function renderStats() {
+            const total = logs.length || 1;
+            document.getElementById('statCards').innerHTML = candidates.map(k => {
+                const p = ((k.suara / total) * 100).toFixed(1);
+                return `
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                        <span>${k.nama}</span><span>${p}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full progress-red transition-all duration-1000" style="width: ${p}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+            const leader = [...candidates].sort((a, b) => b.suara - a.suara)[0];
+            document.getElementById('aiLabel').innerText = leader.suara > 0 ? `${leader.nama.toUpperCase()} LEADING` : "MONITORING...";
         }
 
-        function factoryReset() {
-            if (confirm("PERINGATAN: Hapus total seluruh data?")) {
+        function updateData(i, k, v) {
+            candidates[i][k] = v;
+            save();
+        }
+
+        function uploadImage(e, i) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                candidates[i].foto = ev.target.result;
+                document.getElementById('admPre' + i).src = ev.target.result;
+                save();
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        function deleteRecord(i) {
+            if (confirm("Hapus data?")) {
+                candidates[logs[i].pIdx].suara--;
+                localStorage.removeItem('v_' + logs[i].n.toLowerCase());
+                logs.splice(i, 1);
+                save();
+                refreshAdminUI();
+            }
+        }
+
+        function save() {
+            localStorage.setItem('frd_2026_data', JSON.stringify(candidates));
+            localStorage.setItem('frd_2026_logs', JSON.stringify(logs));
+        }
+
+        function startGlobalTimer() {
+            const m = document.getElementById('timerMin').value;
+            config.expire = new Date().getTime() + (m * 60000);
+            localStorage.setItem('frd_2026_cfg', JSON.stringify(config));
+            location.reload();
+        }
+
+        function toggleChartCfg() {
+            config.chart = !config.chart;
+            localStorage.setItem('frd_2026_cfg', JSON.stringify(config));
+            location.reload();
+        }
+
+        function hardReset() {
+            if (confirm("HAPUS SEMUA?")) {
                 localStorage.clear();
                 location.reload();
             }
         }
 
-        // TIMER INTERVAL
         setInterval(() => {
-            if (config.expiry > 0) {
-                const dist = config.expiry - new Date().getTime();
-                const timerEl = document.getElementById('timerWarning');
+            if (config.expire > 0) {
+                document.getElementById('globalTimer').classList.remove('hidden-section');
+                const dist = config.expire - new Date().getTime();
                 if (dist < 0) {
-                    timerEl.innerText = "VOTING TELAH BERAKHIR";
-                    document.getElementById('loginOverlay').innerHTML = "<div class='text-center py-20 font-black text-red-600 text-2xl uppercase tracking-widest animate-pulse'>Voting Closed</div>";
+                    sessionLocked = true;
+                    document.getElementById('globalTimer').innerText = "VOTING CLOSED";
+                    document.getElementById('loginOverlay').innerHTML = "<div class='text-center animate-pulse'><h2 class='text-5xl font-black text-red-600 tracking-tighter uppercase italic'>Pemilihan Selesai</h2></div>";
                 } else {
-                    const m = Math.floor((dist % 3600000) / 60000);
-                    const s = Math.floor((dist % 60000) / 1000);
-                    timerEl.innerText = `TUTUP DALAM: ${m}m ${s}s`;
+                    const h = Math.floor(dist / 3600000).toString().padStart(2, '0');
+                    const m = Math.floor((dist % 3600000) / 60000).toString().padStart(2, '0');
+                    const s = Math.floor((dist % 60000) / 1000).toString().padStart(2, '0');
+                    document.getElementById('globalTimer').innerText = `${h}:${m}:${s}`;
                 }
             }
         }, 1000);
